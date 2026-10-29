@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Информационная система: УК РФ</title>
+<style>
+:root{--bg:#eef2f7;--card:#fff;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--brand:#1e3a8a;--brand2:#2563eb;
+--red:#ef4444;--amber:#f59e0b;--blue:#3b82f6;--green:#10b981;--warn-bg:#fffbeb;--warn:#92400e}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#131c2e;--ink:#e5e9f2;--mute:#94a3b8;--line:#243049;--brand:#93b4ff;--brand2:#3b82f6;--warn-bg:#2a2208;--warn:#fcd34d}}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);padding:32px 16px}
+.wrap{max-width:860px;margin:0 auto}
+.card{background:var(--card);border-radius:16px;padding:28px;box-shadow:0 6px 24px rgba(15,23,42,.08);margin-bottom:20px}
+h1{margin:0 0 4px;font-size:26px;color:var(--brand)} .sub{color:var(--mute);margin:0 0 20px}
+.search{display:flex;gap:10px;flex-wrap:wrap}
+.search input{flex:1;min-width:200px;padding:13px 16px;font-size:16px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);outline:none}
+.search input:focus{border-color:var(--brand2)}
+button{padding:13px 22px;border:0;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;background:var(--brand2);color:#fff}
+button:hover{filter:brightness(1.1)} .ghost{background:transparent;color:var(--mute);border:2px solid var(--line)}
+.chips{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;color:var(--mute);font-size:14px}
+.chip{padding:5px 12px;border-radius:999px;background:var(--bg);border:1px solid var(--line);cursor:pointer;color:var(--ink);font-size:14px}
+.chip:hover{border-color:var(--brand2)}
+#error{display:none;margin-top:16px;padding:14px;border-radius:10px;background:#fef2f2;color:#b91c1c;text-align:center}
+#result{display:none}
+.art-title{font-size:22px;margin:0 0 4px} .tag{font-size:12px;color:var(--mute)}
+h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:22px 0 8px}
+.box{background:var(--bg);border-radius:10px;padding:14px 16px;line-height:1.6;white-space:pre-line}
+.pun{border-left:5px solid var(--red)}
+.pills{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.pill{background:#fef2f2;color:#991b1b;border-radius:999px;padding:6px 14px;font-weight:600;font-size:14px}
+.demo{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:14px}
+.practice{display:grid;grid-template-columns:200px 1fr;gap:24px;align-items:center}
+@media(max-width:640px){.practice{grid-template-columns:1fr}}
+.donut{position:relative;width:180px;height:180px;margin:auto}
+.donut .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut b{font-size:26px} .donut span{font-size:12px;color:var(--mute)}
+.bar{margin-bottom:14px} .bar .lbl{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
+.bar .bg{height:14px;background:var(--line);border-radius:7px;overflow:hidden}
+.bar .fill{height:100%;width:0;border-radius:7px;transition:width .7s ease}
+details{margin-top:18px} summary{cursor:pointer;color:var(--brand2);font-weight:600}
+.dl{width:100%;margin-top:22px;background:var(--green)}
+.nodata{color:var(--mute);text-align:center;padding:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Информационная система: УК РФ</h1>
+    <p class="sub">Введите номер статьи или часть названия — получите смысл, наказание и судебную практику.</p>
+    <div class="search">
+      <input id="q" list="hints" placeholder="Например: 105, 110.1, 228, «кража»" autocomplete="off">
+      <datalist id="hints"></datalist>
+      <button onclick="search()">Найти</button>
+      <button class="ghost" onclick="clearAll()">Очистить</button>
+    </div>
+    <div class="chips">Быстрый выбор:
+      <span class="chip" onclick="pick('105')">105</span><span class="chip" onclick="pick('111')">111</span>
+      <span class="chip" onclick="pick('158')">158</span><span class="chip" onclick="pick('159')">159</span>
+      <span class="chip" onclick="pick('228')">228</span><span class="chip" onclick="pick('264')">264</span>
+    </div>
+    <div id="error"></div>
+  </div>
+
+  <div class="card" id="result">
+    <h2 class="art-title" id="title"></h2><div class="tag" id="tag"></div>
+    <h3>Что значит статья</h3><div class="box" id="summary"></div>
+    <h3>Предусмотренное наказание</h3><div class="box pun" id="pun"></div><div class="pills" id="pills"></div>
+    <h3>Судебная практика</h3>
+    <div id="practice"></div>
+    <details id="fullBox"><summary>Полный текст статьи (с consultant.ru)</summary><div class="box" id="full" style="margin-top:10px"></div></details>
+    <button class="dl" onclick="download()">Выгрузить текстовый отчёт</button>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let current = null;
+const COL = {prison:'#ef4444', suspended:'#f59e0b', other_punishment:'#3b82f6', acquitted_terminated:'#10b981'};
+const LBL = {prison:'Реальное лишение свободы', suspended:'Условное осуждение', other_punishment:'Иные наказания (штраф, работы…)', acquitted_terminated:'Оправдано / дело прекращено'};
+
+function plural(n){const a=Math.abs(n)%100,b=a%10; if(a>10&&a<20)return'лет'; if(b>1&&b<5)return'года'; if(b===1)return'год'; return'лет';}
+function fmt(n){return Number(n).toLocaleString('ru-RU')}
+function pick(n){$('q').value=n;search()}
+function clearAll(){$('q').value='';$('result').style.display='none';$('error').style.display='none';current=null}
+function showError(t){$('result').style.display='none';$('error').style.background='';$('error').style.color='';$('error').textContent=t;$('error').style.display='block'}
+
+async function search(){
+  const q=$('q').value.trim(); if(!q) return;
+  try{
+    const r=await fetch('/api/article?q='+encodeURIComponent(q)); const d=await r.json();
+    if(d.status==='choose'){ $('result').style.display='none'; const e=$('error'); e.innerHTML='Найдено несколько статей — выберите:<div class="chips" style="justify-content:center"></div>';
+      d.items.forEach(x=>{const c=document.createElement('span');c.className='chip';c.textContent='ст. '+x.article_number+' — '+x.title;c.onclick=()=>pick(x.article_number);e.querySelector('.chips').appendChild(c)});
+      e.style.display='block'; e.style.background='var(--bg)'; e.style.color='var(--ink)'; return }
+    $('error').style.background=''; $('error').style.color='';
+    if(d.status!=='ok') return showError(d.message||'Ошибка');
+    $('error').style.display='none'; render(d.article,d.stats); current=d.article.article_number;
+  }catch(e){showError('Сервер недоступен')}
+}
+
+function render(a,s){
+  $('title').textContent='Статья '+a.article_number+'. '+a.title;
+  $('tag').textContent=a.source==='consultant'?'Источник: КонсультантПлюс':'Источник: учебный справочник';
+  $('summary').textContent=a.summary||(a.content||'').split('\n').slice(0,3).join('\n')||'Нет данных';
+  $('pun').textContent=a.punishment||'Нет данных';
+  const pills=$('pills'); pills.innerHTML='';
+  if(a.prison_max_years!=null){
+    const lo=a.prison_min_years, hi=a.prison_max_years, p=document.createElement('span'); p.className='pill';
+    p.textContent='Лишение свободы: '+(lo>0?'от '+lo+' ':'')+'до '+hi+' '+plural(hi); pills.appendChild(p);
+  }
+  const f=$('fullBox'); if(a.content){$('full').textContent=a.content;f.style.display='block'}else f.style.display='none';
+  renderPractice(s);
+  $('result').style.display='block';
+}
+
+function renderPractice(s){
+  const box=$('practice'); box.innerHTML='';
+  if(!s){box.innerHTML='<div class="nodata">Статистика по этой статье не загружена.</div>';return}
+  if(s.is_demo){const d=document.createElement('div');d.className='demo';
+    d.textContent='Реальная статистика судов.';box.appendChild(d)}
+  const keys=['prison','suspended','other_punishment','acquitted_terminated'];
+  let off=0, R=70, C=2*Math.PI*R, arcs='';
+  keys.forEach(k=>{const len=C*s.percent[k]/100;
+    arcs+=`<circle r="${R}" cx="90" cy="90" fill="none" stroke="${COL[k]}" stroke-width="26" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 90 90)"/>`; off+=len});
+  const wrap=document.createElement('div'); wrap.className='practice';
+  wrap.innerHTML=`<div class="donut"><svg viewBox="0 0 180 180" width="180" height="180">${arcs}</svg>
+    <div class="mid"><b>${fmt(s.charged)}</b><span>привлечено, ${s.year} г.</span></div></div><div id="bars"></div>`;
+  box.appendChild(wrap);
+  const bars=wrap.querySelector('#bars');
+  keys.forEach(k=>{const el=document.createElement('div'); el.className='bar';
+    el.innerHTML=`<div class="lbl"><span>${LBL[k]}</span><span><b>${fmt(s[k])}</b> · ${s.percent[k]}%</span></div>
+      <div class="bg"><div class="fill" style="background:${COL[k]}"></div></div>`;
+    bars.appendChild(el); setTimeout(()=>el.querySelector('.fill').style.width=s.percent[k]+'%',50)});
+}
+
+function download(){ if(current) location.href='/download/'+encodeURIComponent(current) }
+
+let t; $('q').addEventListener('input',e=>{clearTimeout(t); const v=e.target.value.trim();
+  t=setTimeout(async()=>{ if(v.length<2) return; try{
+    const d=await (await fetch('/api/suggest?q='+encodeURIComponent(v))).json();
+    $('hints').innerHTML=''; d.forEach(x=>{const o=document.createElement('option');o.value=x.article_number;o.label='ст. '+x.article_number+' — '+x.title;$('hints').appendChild(o)})}catch(_){}},250)});
+$('q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+</script>
+</body>
+</html>

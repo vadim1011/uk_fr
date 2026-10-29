@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: jurist_db
+    environment:
+      POSTGRES_DB: jurist_laws
+      POSTGRES_USER: jurist_user
+      POSTGRES_PASSWORD: jurist_password
+    ports:
+      - "5432:5432"          # для подключения из DBeaver и локального запуска
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jurist_user -d jurist_laws"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  web:
+    build: .
+    container_name: jurist_web
+    environment:
+      DB_HOST: db
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
